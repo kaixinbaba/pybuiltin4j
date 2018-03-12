@@ -4,10 +4,15 @@
 
   <groupId>com.github.MyEclipse1214</groupId>
   <artifactId>pybuiltin4j</artifactId>
-  <version>0.0.1-RELEASE</version>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
-  <name>xjjtest</name>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+  <name>pybuiltin4j</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -41,4 +46,22 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
