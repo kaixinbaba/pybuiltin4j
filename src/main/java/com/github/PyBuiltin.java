@@ -603,6 +603,9 @@ public class PyBuiltin {
         return false;
     }
     // hasattr end
+    // getattr start
+    // TODO
+    // getattr end
     // sorted start
 
     /**
@@ -630,7 +633,7 @@ public class PyBuiltin {
     }
 
     public static <E extends Comparable> Set<E> sorted(Set<E> source, boolean asc) {
-        Set<E> copy = null;
+        Set<E> copy;
         if (asc) {
             copy = new TreeSet<>(source);
         } else {
@@ -645,7 +648,7 @@ public class PyBuiltin {
     }
 
     public static <K extends Comparable, V> Map<K, V> sorted(Map<K, V> source, boolean asc) {
-        Map<K, V> copy = null;
+        Map<K, V> copy;
         if (asc) {
             copy = new TreeMap<>(source);
         } else {
@@ -654,6 +657,75 @@ public class PyBuiltin {
         }
         return copy;
     }
+
     // sorted end
+    // reversed start
+    public static <E> List<E> reversed(List<E> source) {
+        if (source == null) {
+            throw new NullPointerException();
+        }
+        List<E> copy = new ArrayList<>(source);
+        Collections.reverse(copy);
+        return copy;
+    }
+
+    public static String reversed(String source) {
+        if (source == null) {
+            throw new NullPointerException();
+        }
+        StringBuilder sb = new StringBuilder(source);
+        return str(sb.reverse());
+    }
+
+    // reversed end
+    // frozenset start
+    public static <E> Set<E> frozenset(Collection<E> c) {
+        return new FrozenSet<>(c);
+    }
+
+    public static <K, V> Set<K> frozenset(Map<K, V> m) {
+        return frozenset(m.keySet());
+    }
+
+    public static <E> Set<E> frozenset(E[] array) {
+        return frozenset(Arrays.asList(array));
+    }
+
+    public static Set<String> frozenset(String s) {
+        return frozenset(Arrays.asList(s.split("")));
+    }
+
+    private static class FrozenSet<E> extends HashSet<E> {
+
+        FrozenSet(Collection<? extends E> initCollection) {
+            super(initCollection);
+        }
+
+        @Override
+        public boolean add(E e) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends E> c) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super E> filter) {
+            throw new UnsupportedOperationException();
+        }
+    }
+    // frozenset end
 }
 

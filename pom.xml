@@ -7,8 +7,9 @@
     <version>0.0.1-RELEASE</version>
     <packaging>jar</packaging>
 
-    <name>xjjtest</name>
+    <name>pybuiltin4j</name>
     <url>http://maven.apache.org</url>
+    <description>Use Java implement Python Built-in function, just for fun~</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
