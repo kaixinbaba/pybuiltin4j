@@ -6,11 +6,12 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Like py 最重要的类，所有模仿python内置函数都封装在此
+ * PyBuiltin 最重要的类，所有模仿python内置函数都封装在此
  */
 @SuppressWarnings("unchecked, unused")
 public class PyBuiltin {
@@ -23,6 +24,9 @@ public class PyBuiltin {
         Short s = null;
         BigInteger bi = null;
         BigDecimal bd = null;
+        Map m = null;
+        Collection c = null;
+
     }
 
     private PyBuiltin() {
@@ -115,6 +119,15 @@ public class PyBuiltin {
     }
 
     // str end
+    // int start
+    public static int int_(Object o) {
+        if (o == null) {
+            throw new NullPointerException("Null can not cast to Integer!");
+        }
+        return Integer.valueOf(str(o));
+    }
+
+    // int end
     // bool start
     public static Boolean bool(Object o) {
         if (o == null) {
@@ -140,7 +153,7 @@ public class PyBuiltin {
     }
 
     public static Boolean bool(String s) {
-        return s != null && s!= "";
+        return s != null && s != "";
     }
 
     public static Boolean bool(Collection c) {
@@ -264,9 +277,9 @@ public class PyBuiltin {
         List<E> temp = Arrays.asList(o);
         return needThreadSafe ? new CopyOnWriteArrayList<>(temp) : new ArrayList<>(temp);
     }
+
     // list end
     // sum start
-
     public static <T extends Number> T sum(T[] arr) {
         if (arr == null) {
             throw new NullPointerException();
@@ -474,15 +487,173 @@ public class PyBuiltin {
 
     // all end
     // filter start
-    public static Collection filter(Predicate filter, Collection source) {
+    public static <E> Collection<E> filter(Predicate<E> filter, Collection<E> source) {
         if (source instanceof List) {
-            return (Collection) source.stream().filter(filter).collect(Collectors.toList());
+            return filter(filter, (List<E>) source);
         }
         if (source instanceof Set) {
-            return (Collection) source.stream().filter(filter).collect(Collectors.toSet());
+            return filter(filter, (Set<E>) source);
         }
         return null;
     }
+
+    public static <E> List<E> filter(Predicate<E> filter, List<E> source) {
+        return source.stream().filter(filter).collect(Collectors.toList());
+    }
+
+    public static <E> Set<E> filter(Predicate<E> filter, Set<E> source) {
+        return source.stream().filter(filter).collect(Collectors.toSet());
+    }
+
     // filter end
+    // map start
+    public static <E, R> Collection<R> map(Function<E, R> mapper, Collection<E> source) {
+        if (source instanceof List) {
+            return map(mapper, (List<E>) source);
+        }
+        if (source instanceof Set) {
+            return map(mapper, (Set<E>) source);
+        }
+        return null;
+    }
+
+    public static <E, R> List<R> map(Function<E, R> mapper, List<E> source) {
+        return source.stream().map(mapper).collect(Collectors.toList());
+    }
+
+    public static <E, R> Set<R> map(Function<E, R> mapper, Set<E> source) {
+        return source.stream().map(mapper).collect(Collectors.toSet());
+    }
+
+    // map end
+    // pow start
+    public static Double pow(Number a, Number b) {
+        if (a == null || b == null) {
+            throw new NullPointerException("The number of square calculations can't be null!");
+        }
+        double ta = double_(a);
+        double tb = double_(b);
+        return Math.pow(ta, tb);
+    }
+
+    // pow end
+    // long start
+    public static Long long_(Number n) {
+        if (n == null) {
+            throw new NullPointerException();
+        }
+        return Long.valueOf(str(n));
+    }
+
+    // long end
+    // double start
+    public static Double double_(Number n) {
+        if (n == null) {
+            throw new NullPointerException();
+        }
+        return Double.valueOf(str(n));
+    }
+
+    // double end
+    // float start
+    public static Float float_(Number n) {
+        if (n == null) {
+            throw new NullPointerException();
+        }
+        return Float.valueOf(str(n));
+    }
+
+    // float end
+    // hasattr start
+    public static Boolean hasattr(Object o, String fieldName) {
+        return hasattr(o, fieldName, false);
+    }
+
+    public static Boolean hasattr(Object o, String fieldName, boolean onlyPublic) {
+        if (o == null || fieldName == null) {
+            throw new NullPointerException();
+        }
+        return hasattr(o.getClass(), fieldName, onlyPublic);
+    }
+
+    public static Boolean hasattr(Class clazz, String fieldName) {
+        return hasattr(clazz, fieldName, false);
+    }
+
+    public static Boolean hasattr(Class clazz, String fieldName, boolean onlyPublic) {
+        if (clazz == null || fieldName == null) {
+            throw new NullPointerException();
+        }
+        while (clazz != Object.class) {
+            try {
+                if (onlyPublic) {
+                    clazz.getField(fieldName);
+                } else {
+                    clazz.getDeclaredField(fieldName);
+                }
+                return true;
+            } catch (NoSuchFieldException e) {
+                if (onlyPublic) {
+                    return false;
+                } else {
+                    clazz = clazz.getSuperclass();
+                }
+            }
+        }
+        return false;
+    }
+    // hasattr end
+    // sorted start
+
+    /**
+     * Notice: the function won't change the source list
+     *
+     * @param source
+     * @param <E>
+     * @return a new Collection after sorted
+     */
+    public static <E extends Comparable> List<E> sorted(List<E> source) {
+        return sorted(source, true);
+    }
+
+    public static <E extends Comparable> List<E> sorted(List<E> source, boolean asc) {
+        List<E> copy = new ArrayList<>(source);
+        Collections.sort(copy);
+        if (!asc) {
+            Collections.reverse(copy);
+        }
+        return copy;
+    }
+
+    public static <E extends Comparable> Set<E> sorted(Set<E> source) {
+        return sorted(source, true);
+    }
+
+    public static <E extends Comparable> Set<E> sorted(Set<E> source, boolean asc) {
+        Set<E> copy = null;
+        if (asc) {
+            copy = new TreeSet<>(source);
+        } else {
+            copy = new TreeSet<>(Comparator.reverseOrder());
+            copy.addAll(source);
+        }
+        return copy;
+    }
+
+    public static <K extends Comparable, V> Map<K, V> sorted(Map<K, V> source) {
+        return sorted(source, true);
+    }
+
+    public static <K extends Comparable, V> Map<K, V> sorted(Map<K, V> source, boolean asc) {
+        Map<K, V> copy = null;
+        if (asc) {
+            copy = new TreeMap<>(source);
+        } else {
+            copy = new TreeMap<>(Comparator.reverseOrder());
+            copy.putAll(source);
+        }
+        return copy;
+    }
+    // sorted end
 }
 
